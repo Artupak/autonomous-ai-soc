@@ -34,15 +34,11 @@ class AnomalyLSTMAutoencoder(nn.Module):
         bottleneck_dim: int = 64,
     ) -> None:
         super().__init__()
-        self.encoder_lstm = nn.LSTM(
-            input_dim, hidden_dim, num_layers=1, batch_first=True
-        )
+        self.encoder_lstm = nn.LSTM(input_dim, hidden_dim, num_layers=1, batch_first=True)
         self.bottleneck = nn.Linear(hidden_dim, bottleneck_dim)
         self.expand = nn.Linear(bottleneck_dim, hidden_dim)
         self.activation = nn.LeakyReLU(0.1)
-        self.decoder_lstm = nn.LSTM(
-            hidden_dim, hidden_dim, num_layers=1, batch_first=True
-        )
+        self.decoder_lstm = nn.LSTM(hidden_dim, hidden_dim, num_layers=1, batch_first=True)
         self.output_layer = nn.Linear(hidden_dim, input_dim)
 
     def forward(self, x: Tensor) -> Tensor:
@@ -51,4 +47,4 @@ class AnomalyLSTMAutoencoder(nn.Module):
         z = self.activation(self.bottleneck(enc))
         z = self.activation(self.expand(z))
         dec, _ = self.decoder_lstm(z)
-        return self.output_layer(dec)
+        return self.output_layer(dec)  # type: ignore[no-any-return]

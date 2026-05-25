@@ -102,9 +102,7 @@ class FeatureExtractor:
         variance = float(np.var(X_scaled))
         logger.info("Veri varyansi: %.4f", variance)
         if variance < 0.1:
-            logger.warning(
-                "Dusuk varyans -- sabit degerler agirliklarin donmasina yol acabilir"
-            )
+            logger.warning("Dusuk varyans -- sabit degerler agirliklarin donmasina yol acabilir")
 
         return X_scaled, y
 
@@ -112,9 +110,7 @@ class FeatureExtractor:
     # Kaydet / Yukle
     # -----------------------------------------------------------------
 
-    def save(
-        self, scaler_path: str | None = None, encoder_path: str | None = None
-    ) -> None:
+    def save(self, scaler_path: str | None = None, encoder_path: str | None = None) -> None:
         """Scaler ve encoder paketini diske yaz."""
         scaler_path = scaler_path or SCALER_PATH
         encoder_path = encoder_path or ENCODER_PATH
@@ -162,7 +158,7 @@ class FeatureExtractor:
                 except (ValueError, TypeError):
                     vector[i] = 0.0
 
-        return self.scaler.transform(vector.reshape(1, -1))[0]
+        return self.scaler.transform(vector.reshape(1, -1))[0]  # type: ignore[no-any-return]
 
     @staticmethod
     def _extract_value(column_name: str, record: dict[str, Any]) -> Any:
@@ -171,11 +167,7 @@ class FeatureExtractor:
         'CloudTrailEvent.X.Y.Z' -> record['X']['Y']['Z']
         """
         prefix = "CloudTrailEvent."
-        path = (
-            column_name[len(prefix) :]
-            if column_name.startswith(prefix)
-            else column_name
-        )
+        path = column_name[len(prefix) :] if column_name.startswith(prefix) else column_name
 
         current: Any = record
         for key in path.split("."):

@@ -19,8 +19,7 @@ from unittest.mock import patch
 import pytest
 import numpy as np
 
-from config import SEQUENCE_LENGTH, SCALER_PATH, ENCODER_PATH, MODEL_PATH
-
+from config import SEQUENCE_LENGTH, SCALER_PATH, ENCODER_PATH, MODEL_PATH, BAN_TTL_HOURS
 
 # ===================================================================
 #  IP DOGRULAMA TESTLERI
@@ -140,10 +139,6 @@ class TestBanDatabase:
         assert db == {}
 
 
-# TTL testinde kullaniliyor -- config'den import
-from config import BAN_TTL_HOURS
-
-
 # ===================================================================
 #  FEATURE EXTRACTOR TESTLERI
 # ===================================================================
@@ -218,9 +213,7 @@ class TestModelConsistency:
         ext = FeatureExtractor.load(SCALER_PATH, ENCODER_PATH)
         n = ext.scaler.n_features_in_
         model = AnomalyLSTMAutoencoder(n)
-        model.load_state_dict(
-            torch.load(MODEL_PATH, map_location="cpu", weights_only=True)
-        )
+        model.load_state_dict(torch.load(MODEL_PATH, map_location="cpu", weights_only=True))
         model.eval()
         return model, n
 
@@ -253,8 +246,7 @@ class TestModelConsistency:
             noisy_mse = torch.mean(torch.pow(noisy - model(noisy), 2)).item()
 
         assert noisy_mse > clean_mse, (
-            f"Gurultu MSE ({noisy_mse:.4f}) temiz MSE'den ({clean_mse:.4f}) "
-            f"buyuk olmali"
+            f"Gurultu MSE ({noisy_mse:.4f}) temiz MSE'den ({clean_mse:.4f}) " f"buyuk olmali"
         )
 
 
@@ -285,9 +277,7 @@ class TestAnalyzeRecords:
         n = fe.scaler.n_features_in_
         device = torch.device("cpu")
         model = AnomalyLSTMAutoencoder(n).to(device)
-        model.load_state_dict(
-            torch.load(MODEL_PATH, map_location=device, weights_only=True)
-        )
+        model.load_state_dict(torch.load(MODEL_PATH, map_location=device, weights_only=True))
         model.eval()
         return model, fe, device
 
@@ -340,9 +330,7 @@ class TestAnalyzeRecords:
         banned_db = {"10.0.0.1": {"timestamp": "2024-01-01", "event": "x", "loss": 1.0}}
         records = [{"eventName": "Test", "sourceIPAddress": "10.0.0.1"}] * 3
 
-        count = main.analyze_records(
-            records, model, fe, 999999.0, device, banned_db
-        )
+        count = main.analyze_records(records, model, fe, 999999.0, device, banned_db)
         assert count == 3
 
 
@@ -394,6 +382,4 @@ class TestExecuteDefense:
         db = {}
         with patch("main.execute_real_firewall_ban", return_value=False):
             main.execute_defense("10.20.30.40", "SuspiciousEvent", 50.0, 1.0, db)
-        assert "10.20.30.40" not in db, (
-            "Firewall basarisiz oldugunda IP ban DB'ye eklenmemeli"
-        )
+        assert "10.20.30.40" not in db, "Firewall basarisiz oldugunda IP ban DB'ye eklenmemeli"

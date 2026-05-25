@@ -218,8 +218,7 @@ def execute_defense(
     else:
         # Firewall basarisiz, IP ban DB'ye eklenmedi
         _audit_log(
-            f"FW_FAIL_NO_BAN | IP: {ip_address} | "
-            f"Event: {event_name} | Loss: {loss_score:.4f}"
+            f"FW_FAIL_NO_BAN | IP: {ip_address} | " f"Event: {event_name} | Loss: {loss_score:.4f}"
         )
 
         logger.warning(
@@ -275,9 +274,7 @@ def analyze_records(
 
             if loss > threshold:
                 trigger = meta_buffer[-1]
-                execute_defense(
-                    trigger["ip"], trigger["event"], loss, threshold, banned_db
-                )
+                execute_defense(trigger["ip"], trigger["event"], loss, threshold, banned_db)
 
     return count
 
@@ -312,9 +309,7 @@ def run_scan(
             with open(fpath, "r", encoding="utf-8") as f:
                 records = json.load(f).get("Records", [])
             if records:
-                total += analyze_records(
-                    records, model, fe, threshold, device, banned_db
-                )
+                total += analyze_records(records, model, fe, threshold, device, banned_db)
         except (FileNotFoundError, json.JSONDecodeError, ValueError) as e:
             logger.error("Dosya okunamadi: %s -- %s", fpath, e)
             errors += 1
@@ -340,9 +335,7 @@ def run_daemon(
 ) -> None:
     """Surekli izleme dongusu. Yeni dosyalari otomatik isle."""
     logger.info("=== DAEMON MODU ===")
-    logger.info(
-        "Cihaz: %s | Esik: %.6f | Aralik: %ds", device, threshold, SCAN_INTERVAL
-    )
+    logger.info("Cihaz: %s | Esik: %.6f | Aralik: %ds", device, threshold, SCAN_INTERVAL)
 
     # Graceful shutdown icin sinyal yonetimi
     running = True
@@ -360,9 +353,7 @@ def run_daemon(
 
     while running:
         try:
-            files = glob.glob(
-                os.path.join(TARGET_LOG_DIR, "**", "*.json"), recursive=True
-            )
+            files = glob.glob(os.path.join(TARGET_LOG_DIR, "**", "*.json"), recursive=True)
             new_files = [f for f in files if f not in seen]
 
             for fpath in new_files:
@@ -370,9 +361,7 @@ def run_daemon(
                     with open(fpath, "r", encoding="utf-8") as f:
                         records = json.load(f).get("Records", [])
                     if records:
-                        analyze_records(
-                            records, model, fe, threshold, device, banned_db
-                        )
+                        analyze_records(records, model, fe, threshold, device, banned_db)
                 except (FileNotFoundError, json.JSONDecodeError, ValueError):
                     pass
                 seen.add(fpath)
@@ -465,9 +454,7 @@ def run_simulate(
             mse = torch.mean(torch.pow(seq - recon, 2)).item()
 
         status = "ANOMALI" if mse > threshold else "NORMAL"
-        logger.info(
-            "  Paket %d (%s / %s) -> %s (MSE: %.6f)", i + 1, ip, event, status, mse
-        )
+        logger.info("  Paket %d (%s / %s) -> %s (MSE: %.6f)", i + 1, ip, event, status, mse)
 
     # --- Saldiri trafigi: degistirilmis kayitlar ---
     logger.info("")
@@ -599,14 +586,10 @@ def main() -> None:
     # Model yukle
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = AnomalyLSTMAutoencoder(input_dim).to(device)
-    model.load_state_dict(
-        torch.load(MODEL_PATH, map_location=device, weights_only=True)
-    )
+    model.load_state_dict(torch.load(MODEL_PATH, map_location=device, weights_only=True))
     model.eval()
 
-    logger.info(
-        "Model yuklendi (%s). Girdi: %d, Esik: %.6f", device, input_dim, threshold
-    )
+    logger.info("Model yuklendi (%s). Girdi: %d, Esik: %.6f", device, input_dim, threshold)
 
     modes = {"scan": run_scan, "daemon": run_daemon, "simulate": run_simulate}
     modes[args.mode](model, fe, threshold, device)

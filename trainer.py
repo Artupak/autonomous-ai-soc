@@ -34,7 +34,6 @@ from sklearn.metrics import (
 from config import (
     DATASET_PATH,
     SEQUENCE_LENGTH,
-    NORMAL_CLASS,
     MODEL_PATH,
     SCALER_PATH,
     ENCODER_PATH,
@@ -192,17 +191,11 @@ class CloudAITrainer:
 
         with torch.no_grad():
             recon = self.model(self.X_test_tensor)
-            mse = (
-                torch.mean(torch.pow(self.X_test_tensor - recon, 2), dim=(1, 2))
-                .cpu()
-                .numpy()
-            )
+            mse = torch.mean(torch.pow(self.X_test_tensor - recon, 2), dim=(1, 2)).cpu().numpy()
 
             val_in = self.val_loader.dataset.tensors[0].to(self.device)  # type: ignore
             val_recon = self.model(val_in)
-            val_mse = (
-                torch.mean(torch.pow(val_in - val_recon, 2), dim=(1, 2)).cpu().numpy()
-            )
+            val_mse = torch.mean(torch.pow(val_in - val_recon, 2), dim=(1, 2)).cpu().numpy()
 
         # Esik: validation ortalamasindan 3 standart sapma yukari
         self.threshold = float(np.mean(val_mse) + 3 * np.std(val_mse))
@@ -250,9 +243,7 @@ if __name__ == "__main__":
 
     logger.info("=== CLOUD AI V2 EGITIM MOTORU ===")
 
-    trainer = CloudAITrainer(
-        data_path=DATASET_PATH, epochs=120, batch_size=256, lr=1e-3
-    )
+    trainer = CloudAITrainer(data_path=DATASET_PATH, epochs=120, batch_size=256, lr=1e-3)
     try:
         trainer.prepare_data()
         trainer.build_and_train()
