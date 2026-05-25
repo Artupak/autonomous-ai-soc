@@ -1,0 +1,11 @@
+services:
+  soc-engine:
+    build: .
+    container_name: artupak-soc
+    volumes:
+      - ./aws_dataset-main:/app/aws_dataset-main:ro
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_ADMIN
+    restart: unless-stopped

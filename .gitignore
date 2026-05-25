@@ -1,0 +1,17 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pth
+*.pkl
+*.log
+*.csv
+.env
+.venv/
+venv/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+banned_ips_daemon.json
+cloud_ai_V2_threshold.json
+aws_kaggle_dataset/
+aws_dataset-main/
