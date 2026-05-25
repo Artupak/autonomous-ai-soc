@@ -2,7 +2,7 @@
   <h1 align="center">artupak — AI-Powered Autonomous SOC Engine</h1>
   <p align="center">
     LSTM Autoencoder tabanli anomali tespit sistemi ile AWS CloudTrail loglarini<br>
-    gercek zamanli analiz eden ve tehditleri otonom olarak engelleyen guvenlik motoru.
+    gercek zamanli analiz eden ve tehditleri otonom olarak engelleyen guvenlik motoru.(BETA- GELİŞTİRME AŞAMASINDA)
   </p>
 </p>
 
